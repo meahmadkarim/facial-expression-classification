@@ -28,3 +28,15 @@ The system classifies dataset expression labels, not a person's inner emotional 
 ## Verification
 
 The maintained baseline completed loading, grouped splitting, fitting, prediction and artifact saving on a generated noise-image fixture. This validates software execution only. No facial-expression accuracy is claimed from synthetic fixtures.
+
+## Architecture and library details
+
+### Historical CNN experiment
+
+**pandas** reads the eight-column annotation file and filters face-confidence values. **OpenCV (`cv2`)** loads images, crops annotated faces and resizes them to 64×64 RGB. **NumPy** forms image arrays and scales pixel values by 255. The notebook uses **imbalanced-learn SMOTE** before splitting; this is a known evaluation flaw, not a recommended method.
+
+The **TensorFlow/Keras Sequential CNN** has a 32-filter 3×3 ReLU convolution, 2×2 max-pooling, a 64-filter 3×3 ReLU convolution, another max-pooling layer, flattening, a 128-unit ReLU dense layer and seven-class softmax output. It specifies Adam, categorical cross-entropy, batch size 32 and 50 epochs. `ImageDataGenerator` specifies rotation, shifts, shear, zoom and horizontal flips. These are code settings, not proof of a successfully reproduced training run.
+
+### Maintained CPU baseline
+
+**Pillow** loads/crops images and converts them to 32×32 grayscale; **NumPy** scales and flattens pixels. **scikit-learn `GroupShuffleSplit`** holds out 20% by source image before training. **`StandardScaler` → `LogisticRegression(max_iter=1000, class_weight='balanced', random_state=42)`** forms the classifier pipeline. Balanced accuracy and a classification report describe predictions. **joblib** saves the fitted pipeline; JSON stores metrics. This baseline uses no SMOTE and is distinct from the CNN.
